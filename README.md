@@ -20,8 +20,12 @@ Additional files can help you edit key variables to change the experiments param
 
 - `.env`: you should duplicate `.env.example` into a `.env` file to fill in your API keys. We are using OpenRouter in our case.
 
+## Prompts
+
+Every prompt we designed is stored in a .j2 file.
+
 ## Citation
 
 Cite our work using:
 
-> TODO
+> the work has been submitted but not accepted yet.
