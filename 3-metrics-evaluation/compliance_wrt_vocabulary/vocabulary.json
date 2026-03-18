@@ -1,0 +1,64 @@
+{
+  "description": "Reference vocabulary for a medical diagnostic Prolog knowledge base. Defines the expected predicates, their arities, and the semantic type of each parameter position. These type labels are used as reference embeddings when checking whether actual argument values semantically match their expected roles.",
+  "predicates": {
+    "patient": {
+      "arity": 2,
+      "description": "Associates a patient with a characteristic of his.",
+      "params": [
+        {
+          "position": 0,
+          "type_label": "patient_id",
+          "description": "The identifier of the patient"
+        },
+        {
+          "position": 1,
+          "type_label": "characteristic",
+          "description": "A characteristic of the patient"
+        }
+      ]
+    },
+    "symptom": {
+      "arity": 2,
+      "description": "Associates a patient with a clinical symptom they exhibit.",
+      "params": [
+        {
+          "position": 0,
+          "type_label": "patient",
+          "description": "The patient identifier (the individual who has the symptom)."
+        },
+        {
+          "position": 1,
+          "type_label": "symptom",
+          "description": "A clinical symptom or sign observed in the patient (e.g., fever, cough, headache)."
+        }
+      ]
+    },
+    "condition": {
+      "arity": 2,
+      "description": "Associates a patient with a medical condition they have or are suspected of having.",
+      "params": [
+        {
+          "position": 0,
+          "type_label": "patient",
+          "description": "The patient identifier."
+        },
+        {
+          "position": 1,
+          "type_label": "medical condition",
+          "description": "A medical condition, disease, or syndrome (e.g., pneumonia, diabetes, hypertension)."
+        }
+      ]
+    },
+    "diagnosis": {
+      "arity": 1,
+      "description": "Represents the final diagnosis conclusion, used as the query target (e.g., ?- diagnosis(X).).",
+      "params": [
+        {
+          "position": 0,
+          "type_label": "medical diagnosis",
+          "description": "The final diagnostic conclusion for the patient case (e.g., stroke, myocardial_infarction)."
+        }
+      ]
+    }
+  }
+}

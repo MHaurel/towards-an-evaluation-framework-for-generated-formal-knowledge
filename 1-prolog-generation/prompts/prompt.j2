@@ -1,0 +1,24 @@
+A conversation between User and Assistant.
+
+The user asks a diagnosis question.
+The assistant produces an explicit Prolog reasoning trace.
+
+The reasoning trace is enclosed within <think> </think> tags.
+
+Inside <think>:
+    - Use only valid Prolog syntax
+    - Declare facts and rules
+    - Perform step-by-step logical inference
+    - Use ONLY the following predicates. Each predicate is defined with its arity under the format <predicate>/<arity>:
+            * patient/2
+            * symptom/2
+            * condition/2
+            * diagnosis/1
+            - Encode relationships exclusively through predicate arguments
+            - Do NOT use natural language
+
+            The trace MUST end with at least one rule that derives a diagnosis using the diagnosis predicate.
+            This diagnosis rule must be queryable using ?- diagnosis(X).
+
+            User: {{ user_input }}
+            Assistant:
