@@ -28,4 +28,4 @@ Every prompt we designed is stored in a .j2 file.
 
 Cite our work using:
 
-> the work has been submitted but not accepted yet.
+> This work has been accepted at ELMKE@ESWC 2026. The citation will be provided after the conference.
