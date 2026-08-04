@@ -2,8 +2,9 @@
 metrics.py - Per-program quality metric for unused-terms detection.
 
 The metric is the **clause utilization score**: the fraction of user-defined
-clause instances that are *exercised* during the execution of the standard
-query ``?- diagnosis(X).``
+clause instances that are *exercised* during the execution of the traced
+query (default ``?- diagnosis(X).``; overridable via
+``UnusedTermsAnalyzer(..., query=...)``).
 
     score = |used_clauses| / |all_clauses|   ∈ [0.0, 1.0]
 

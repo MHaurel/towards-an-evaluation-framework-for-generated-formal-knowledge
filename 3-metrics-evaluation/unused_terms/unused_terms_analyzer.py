@@ -10,9 +10,9 @@ Approach
 --------
 1. **Dynamic analysis (primary):** spawn a fresh SWI-Prolog subprocess,
    load the KB, enumerate every user-defined clause head via
-   ``predicate_property/2`` + ``clause/2``, run the meta-interpreter on
-   ``?- diagnosis(X).``, collect the fully-instantiated goals from the proof
-   tree, and compute:
+   ``predicate_property/2`` + ``clause/2``, run the meta-interpreter on the
+   configured query (default ``?- diagnosis(X).``), collect the
+   fully-instantiated goals from the proof tree, and compute:
        unused_clauses = all_clauses − used_clauses
    Each subprocess gets a pristine Prolog engine, avoiding pyswip singleton
    contamination.
@@ -21,8 +21,9 @@ Approach
    a regex-based approximation is used instead (predicate-level, no clause
    enumeration).
 
-3. **Query-failed:** if the KB loads fine but ``diagnosis(X)`` returns no
-   solutions, the program is flagged as badly formed.
+3. **Query-failed:** if the KB loads fine but the traced query returns no
+   solutions, the program is flagged as badly formed.  The default query is
+   ``diagnosis(X)`` (legacy medical KBs); callers can override it.
 """
 
 import re
@@ -379,8 +380,9 @@ _SWIPL_SCRIPT = textwrap.dedent(r"""
               normalize_term_atom(Head, HeadAtom) ),
             AllClauses),
         ( catch(
-              ( findall(Goals,
-                    ( solve(diagnosis(_), Proof),
+              ( read_term_from_atom('__QUERY_ATOM__', Query, []),
+                findall(Goals,
+                    ( solve(Query, Proof),
                       collect_used_goals(Proof, Goals) ),
                     GoalLists),
                 GoalLists \= [] ),
@@ -397,14 +399,38 @@ _SWIPL_SCRIPT = textwrap.dedent(r"""
 """)
 
 
+def _normalize_query(query: str) -> str:
+    """Strip whitespace / trailing period so the atom is a valid Prolog term."""
+    return query.strip().rstrip(".").strip()
+
+
+def _escape_prolog_atom(text: str) -> str:
+    """Escape a Python string for embedding inside a single-quoted Prolog atom."""
+    return text.replace("\\", "\\\\").replace("'", "''")
+
+
+def _build_swipl_script(query: str) -> str:
+    query_atom = _escape_prolog_atom(_normalize_query(query))
+    return _SWIPL_SCRIPT.replace("__QUERY_ATOM__", query_atom)
+
+
 # ---------------------------------------------------------------------------
 # Subprocess runner
 # ---------------------------------------------------------------------------
 
-def _run_swipl(kb_text: str, timeout: int = 60) -> dict:
+def _run_swipl(kb_text: str, query: str = "diagnosis(X)", timeout: int = 60) -> dict:
     """
     Spawn a fresh ``swipl`` process, feed it ``kb_text`` on stdin, and parse
     its structured output.
+
+    Parameters
+    ----------
+    kb_text:
+        Prolog/Datalog source to consult.
+    query:
+        Goal to trace for clause utilization (default: ``diagnosis(X)``).
+    timeout:
+        Subprocess timeout in seconds.
 
     Returns a dict with keys:
       - ``status``: ``"success"`` | ``"query_failed"`` | ``"load_error"``
@@ -415,7 +441,7 @@ def _run_swipl(kb_text: str, timeout: int = 60) -> dict:
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".pl", delete=False, encoding="utf-8"
     ) as f:
-        f.write(_SWIPL_SCRIPT)
+        f.write(_build_swipl_script(query))
         script_path = f.name
 
     try:
@@ -692,7 +718,7 @@ class UnusedTermsAnalyzer:
 
     The analyzer spawns a fresh ``swipl`` subprocess for each KB (avoiding
     pyswip singleton contamination), loads the KB, enumerates every user-defined
-    clause head, runs the standard query ``diagnosis(X)`` through the built-in
+    clause head, runs the configured query through the built-in
     meta-interpreter, collects all goals that appeared in the proof, and
     computes the diff.
 
@@ -701,7 +727,8 @@ class UnusedTermsAnalyzer:
     code:
         Prolog source code as a string.
     query:
-        Prolog query to trace.  Defaults to ``"diagnosis(X)"``.
+        Prolog query to trace for utilization.  Defaults to ``"diagnosis(X)"``
+        for backward compatibility with medical KBs that expose that goal.
     python_exe:
         Ignored (kept for backward compatibility with old call sites that
         passed ``python_exe=...``).  The new implementation calls ``swipl``
@@ -712,7 +739,7 @@ class UnusedTermsAnalyzer:
 
     def __init__(self, code: str, query: str = DEFAULT_QUERY, python_exe: str = ""):
         self.code = code.strip()
-        self.query = query  # stored for reference; currently always diagnosis(_)
+        self.query = _normalize_query(query) if query else self.DEFAULT_QUERY
 
     def analyze(self) -> UnusedTermsResult:
         """Run the analysis and return an :class:`UnusedTermsResult`."""
@@ -725,7 +752,7 @@ class UnusedTermsAnalyzer:
 
         # --- dynamic path ---
         try:
-            raw = _run_swipl(self.code)
+            raw = _run_swipl(self.code, query=self.query)
         except Exception as exc:
             # swipl not found or subprocess crashed — try static fallback
             try:
