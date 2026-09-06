@@ -28,4 +28,18 @@ Every prompt we designed is stored in a .j2 file.
 
 Cite our work using:
 
-> This work has been accepted at ELMKE@ESWC 2026. The citation will be provided after the conference.
+@inproceedings{haurel2026evaluation, 
+  author = {Haurel, Maxime and Brun, Armelle and d'Aquin, Mathieu}, 
+  title = {Towards an Evaluation Framework for Generated Formal Knowledge}, 
+  booktitle = {LLMS4KGOE 2026 and ELMKE 2026: Joint Proceedings of the First Workshop on LLM-driven Knowledge Graph and Ontology Engineering and the Third Workshop on Evaluation of Language Models in Knowledge Engineering, co-located with ESWC 2026}, 
+  editor = {Dalal, Aryan Singh and Jagodnik, Kathleen and Maleshkova, Maria and Shimizu, Cogan and Lippolis, Anna Sofia and Alharbi, Reham and Zhang, Bohui and He, Yuan and K{\"u}ç{\"u}k McGinty, Hande}, 
+  series = {CEUR Workshop Proceedings}, 
+  volume = {4246}, 
+  pages = {177--191}, 
+  year = {2026}, 
+  month = may, 
+  address = {Dubrovnik, Croatia}, 
+  publisher = {CEUR-WS.org}, 
+  url = {https://ceur-ws.org/Vol-4246/elmke-5.pdf} 
+}
+
